@@ -34,7 +34,21 @@ class FIRFilter:
     pfr = np.arctan(sinSum / cosSum)
     return pfr
 
+
   def filterSignal(self, signal):
-    res = [np.sum(signal[i-self.depth+1:i] * self.coefs) for i in range(self.depth-1, len(signal))]
+    res = [np.sum(signal[i-self.depth+1:i] * self.coefs[::-1]) for i in range(self.depth-1, len(signal))]
     return res
+
+
+  def getImpulseResponse(self, n):
+    imp = np.zeros(n)
+    imp[n // 2] = 1
+    return self.filterSignal(imp)
+
+
+  def getStepResponse(self, n):
+    step = np.zeros(n)
+    step[n//2:] = 1
+    return self.filterSignal(step)
+
 
