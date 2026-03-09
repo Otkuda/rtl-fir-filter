@@ -44,48 +44,9 @@ class FIRFilter:
     return pfr
 
 
-  def filterSignal(self, signal):
-    res = np.array([np.sum(signal[i-self.depth+1:i] * self.coefs[::-1]) for i in range(self.depth-1, len(signal))])
-    return res
-
-  
-  def filterFixedSignal(self, signal):
-    if "complex" in str(signal.dtype):
-      res = np.zeros(len(signal)-self.depth-1, dtype="complex128")
-      for i in range(self.depth-1, len(signal)):
-        signalPart = signal[i-self.depth+1:i]
-        for j in range(len(signalPart)):
-          coef = int(self.fixedCoeffs[-(j+1)])
-          tempReal = int(signalPart[j].real) * coef
-          tempImag = int(signalPart[j].imag) * coef
-          if temp < 0:
-            tempReal >>= self.precisionBits
-            tempImag >>= self.precisionBits
-          else:
-            tempReal >>= self.precisionBits
-            tempImag >>= self.precisionBits
-
-          res[i * len(signalPart) + j] += tempReal + tempImag * 1j
-    else:
-      res = np.zeros(len(signal)-self.depth-1)
-      for i in range(self.depth-1, len(signal)):
-        signalPart = signal[i-self.depth+1:i]
-        for j in range(len(signalPart)):
-          coef = int(self.fixedCoeffs[-(j+1)])
-          temp = int(signalPart[j]) * coef
-          if temp < 0:
-            temp = -(-temp >> self.precisionBits)
-          else:
-            temp >>= self.precisionBits
-
-          res[i-self.depth-1] += temp
-    
-    return res
-
-
   def getImpulseResponse(self, n):
     imp = np.zeros(n)
-    imp[n // 2] = 1
+    imp[n//2] = 1
     return self.filterSignal(imp)
 
 
@@ -93,5 +54,52 @@ class FIRFilter:
     step = np.zeros(n)
     step[n//2:] = 1
     return self.filterSignal(step)
+
+
+  def filterSignal(self, signal):
+    res = np.array([np.sum(signal[i-self.depth+1:i] * self.coefs[::-1]) for i in range(self.depth-1, len(signal))])
+    return res
+
+  
+  def filterFixedSignal(self, signal):
+    if "complex" in str(signal.dtype):
+      res = np.zeros(len(signal)-self.depth+1, dtype="complex128")
+      for i in range(self.depth-1, len(signal)):
+        signalPart = signal[i-self.depth+1:i]
+        for j in range(len(signalPart)):
+          coef = int(self.fixedCoeffs[-(j+1)])
+          tempReal = int(signalPart[j].real) * coef
+          tempImag = int(signalPart[j].imag) * coef
+
+          res[i-self.depth+1] += self.__roundToInt16(tempReal) + self.__roundToInt16(tempImag) * 1j
+    else:
+      res = np.zeros(len(signal)-self.depth+1)
+      for i in range(self.depth-1, len(signal)):
+        signalPart = signal[i-self.depth+1:i]
+        for j in range(len(signalPart)):
+          coef = int(self.fixedCoeffs[-(j+1)])
+          temp = int(signalPart[j]) * coef
+
+          res[i-self.depth-1] += self.__roundToInt16(temp)
+    
+    return res
+
+  def __roundToInt16(self, num):
+    """
+    Округляет число формата Q15.<presicionBits> в целое число по схеме RoundToEven
+    """
+    if num == 0:
+      return 0
+
+    numBits = bin(num & 0x7fffffff)[2:]
+    if len(numBits) < 16:
+      return 0
+
+    temp = f"0b{"0" * 16}{numBits[len(numBits)-16]}{(31-16-1) * str(int(numBits[len(numBits)-16])^1)}"
+    res = num + int(temp, 2)
+
+    if res < 0:
+      return -(-res >> self.precisionBits)
+    return  res >> self.precisionBits
 
 
