@@ -26,6 +26,32 @@ compute_mac #(
   .o_res_complex({res_real, res_imag})
 );
 
+/*
+ * Методы
+ */
+
+task reset()
+  rst <= '1;
+  #(CLK_PERIOD);
+  rst <= '0;
+endtask
+
+task drive_inputs()
+  coef_real   <= $urandom_range(-2 ** 15, 2 ** 15);
+  signal_real <= $urandom_range(-2 ** 15, 2 ** 15);
+  signal_imag <= $urandom_range(-2 ** 15, 2 ** 15);
+
+endtask
+
+task test()
+  wait(~rst);
+  repeat(100) begin
+    drive_inputs();
+    mon_outputs();
+    check();
+  end
+endtask
+
 initial begin
   clk = '0;
   forever begin
@@ -34,22 +60,8 @@ initial begin
 end
 
 initial begin
-  @(posedge clk);
-  rst <= '1;
-  @(posedge clk);
-  rst <= '0;
-  signal_real <= -2;
-  signal_imag <=  1;
-  coef_real   <= 16'b1000000000000000;
-  adder_real  <= '0;
-  adder_imag  <= '0;
-  @(posedge clk);
-  signal_real <= 100;
-  signal_imag <= 500;
-  coef_real   <= 16'b1100000000000000;
-  adder_real  <= -100;
-  adder_imag  <= 1234;
-  repeat (5) @(posedge clk);
+  reset();
+  test();
   $stop;
 end
 
