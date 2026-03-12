@@ -92,14 +92,12 @@ class FIRFilter:
       return 0
 
     numBits = bin(num & 0x7fffffff)[2:]
-    if len(numBits) < 16:
+    if len(numBits) < 15:
       return 0
 
     temp = f"0b{"0" * 16}{numBits[len(numBits)-16]}{(31-16-1) * str(int(numBits[len(numBits)-16])^1)}"
     res = num + int(temp, 2)
 
-    if res < 0:
-      return -(-res >> self.precisionBits)
     return  res >> self.precisionBits
 
 
