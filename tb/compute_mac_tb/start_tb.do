@@ -1,4 +1,8 @@
 vlib work
+vlog ../util_pkg.svh
 vlog ../../rtl/compute_mac.sv
 vlog ./compute_mac_tb.sv
 vsim -novopt work.compute_mac_tb
+
+do wave.do
+run -all
