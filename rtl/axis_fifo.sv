@@ -1,28 +1,28 @@
-module #(
+module axis_fifo #(
   DEPTH = 8,
   WIDTH = 16
-) axis_fifo (
+) (
   input logic clk,
   input logic rst,
   
-  input  logic axis_tdata_s,
-  input  logic axis_tvalid_s,
-  output logic axis_tready_s,
+  input  logic [WIDTH-1:0] axis_tdata_s,
+  input  logic             axis_tvalid_s,
+  output logic             axis_tready_s,
 
-  output logic axis_tdata_m,
-  output logic axis_tvalid_m,
-  input  logic axis_tready_m
+  output logic [WIDTH-1:0] axis_tdata_m,
+  output logic             axis_tvalid_m,
+  input  logic             axis_tready_m
 );
 
-  localparam pointer_width = $clog2 (depth),
-             counter_width = $clog2 (depth + 1);
+  localparam pointer_width = $clog2 (DEPTH),
+             counter_width = $clog2 (DEPTH + 1);
 
-  localparam [counter_width - 1:0] max_ptr = counter_width' (depth - 1);
+  localparam [counter_width - 1:0] max_ptr = counter_width' (DEPTH - 1);
 
 
   logic [pointer_width - 1:0] wr_ptr_d, rd_ptr_d, wr_ptr_q, rd_ptr_q;
   logic empty_d, full_d, empty_q, full_q;
-  logic [width - 1:0] data [0: depth - 1];
+  logic [WIDTH - 1:0] data [0: DEPTH - 1];
   logic push, pop;
 
   assign push = axis_tvalid_s && !full_q;
