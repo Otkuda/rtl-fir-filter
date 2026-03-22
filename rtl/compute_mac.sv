@@ -9,81 +9,52 @@ module compute_mac #(
   input  clk,
   input  rst,
 
-  input  logic        [DATA_WIDTH*2-1:0] i_signal_complex, // { real, imag }
-  input  logic signed [DATA_WIDTH-1:0]   i_coef_real,
+  input  logic signed [DATA_WIDTH-1:0] i_signal,
+  input  logic signed [DATA_WIDTH-1:0] i_coef,
 
-  input  logic        [DATA_WIDTH*2-1:0] i_adder_complex, // { real, imag }
-
-  output logic [DATA_WIDTH*2-1:0] o_res_complex
+  output logic signed [(DATA_WIDTH+8)-1:0] o_res,
+  input  logic i_res_valid
 
 );
 
 // Discarding MSB since its redundant after fixed-point multiplication
 localparam MULT_WIDTH  = DATA_WIDTH * 2 - 1; 
-localparam MAC_WIDTH   = MULT_WIDTH + 1;  // extra bit for addition carry 
+localparam MAC_WIDTH   = (DATA_WIDTH + 8) - 1;  // extra bit for addition carry 
   
-logic signed [DATA_WIDTH-1:0] signal_real, signal_imag;
+logic signed [MULT_WIDTH-1:0] mul_res;
+logic signed [ MAC_WIDTH-1:0] mac_res;
+logic signed [DATA_WIDTH-1:0] round_res;
 
-logic signed [MULT_WIDTH-1:0] mul_res_real, mul_res_imag;
+logic [MULT_WIDTH:0] pre_round;
 
-logic signed [DATA_WIDTH-1:0] adder_real_0;
-logic signed [DATA_WIDTH-1:0] adder_imag_0;
+assign pre_round = mul_res + { {(DATA_WIDTH){1'b0}}, 
+                               mul_res[MULT_WIDTH-DATA_WIDTH],
+                              {(MULT_WIDTH-DATA_WIDTH-1){!mul_res[MULT_WIDTH-DATA_WIDTH]}} };
 
-logic signed [MAC_WIDTH-1:0] mac_res_real, mac_res_imag;
-logic signed [DATA_WIDTH-1:0] round_res_real, round_res_imag;
-
-logic [MAC_WIDTH-1:0] pre_round_real, pre_round_imag;
-
-assign signal_real = i_signal_complex[DATA_WIDTH*2-1:DATA_WIDTH]; 
-assign signal_imag = i_signal_complex[DATA_WIDTH-1:0];
-
-assign pre_round_real = mac_res_real + { {(DATA_WIDTH){1'b0}}, 
-                                          mac_res_real[MULT_WIDTH-DATA_WIDTH],
-                                          {(MULT_WIDTH-DATA_WIDTH-1){!mac_res_real[MULT_WIDTH-DATA_WIDTH]}} };
-
-always_ff @(posedge clk) begin : real_part
+always_ff @(posedge clk) begin
   if (rst) begin
-    mul_res_real <= '0;
-    adder_real_0   <= '0;
+    mul_res   <= '0;
+    mac_res   <= '0;
+    round_res <= '0;
   end
   else begin
     // -- Stage 1 - Multiplication --
-    mul_res_real <= signal_real * i_coef_real;
-    adder_real_0 <= i_adder_complex[DATA_WIDTH*2-1:DATA_WIDTH];
+    mul_res <= i_signal * i_coef;
 
-    // -- Stage 2 - Addition --
-    mac_res_real <= mul_res_real + { adder_real_0, {(DATA_WIDTH-1){1'b0}} };
+    // -- Stage 2 - Rounding -- 
+    round_res <= pre_round[MULT_WIDTH-1:MULT_WIDTH-DATA_WIDTH];
 
-    // -- Stage 3 - Rounding -- 
-    round_res_real <= pre_round_real[MULT_WIDTH-1:MULT_WIDTH-DATA_WIDTH];
-
+    // -- Stage 3 - Addition --
+    if (i_res_valid) begin
+      mac_res <= round_res;
+    end
+    else begin
+      mac_res <= mac_res + round_res;
+    end
   end
-end : real_part
+end
 
-
-assign pre_round_imag = mac_res_imag + { {(DATA_WIDTH){1'b0}}, 
-                                          mac_res_imag[MULT_WIDTH-DATA_WIDTH],
-                                          {(MULT_WIDTH-DATA_WIDTH-1){!mac_res_imag[MULT_WIDTH-DATA_WIDTH]}} };
-
-always_ff @(posedge clk) begin : imag_part
-  if (rst) begin
-    mul_res_imag <= '0;
-    adder_imag_0   <= '0;
-  end
-  else begin
-    // -- Stage 1 - Multiplication --
-    mul_res_imag <= signal_imag * i_coef_real;
-    adder_imag_0 <= i_adder_complex[DATA_WIDTH-1:0];
-
-    // -- Stage 2 - Addition --
-    mac_res_imag <= mul_res_imag + { adder_imag_0, {(DATA_WIDTH-1){1'b0}} };
-
-    // -- Stage 3 - Rounding -- 
-    round_res_imag <= pre_round_imag[MULT_WIDTH-1:MULT_WIDTH-DATA_WIDTH];
-
-  end
-end : imag_part
-
-assign o_res_complex = { round_res_real, round_res_imag };
+assign o_res = mac_res;
 
 endmodule
+
