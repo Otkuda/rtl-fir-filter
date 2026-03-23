@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 
 /*
-  Pipelined MAC (complex*real)+complex
+  Pipelined MAC 
 */
 module compute_mac #(
   DATA_WIDTH = 16
@@ -17,9 +17,8 @@ module compute_mac #(
 
 );
 
-// Discarding MSB since its redundant after fixed-point multiplication
 localparam MULT_WIDTH  = DATA_WIDTH * 2 - 1; 
-localparam MAC_WIDTH   = (DATA_WIDTH + 8) - 1;  // extra bit for addition carry 
+localparam MAC_WIDTH   = (DATA_WIDTH + 8) - 1;  // extra bits for addition carry 
   
 logic signed [MULT_WIDTH-1:0] mul_res;
 logic signed [ MAC_WIDTH-1:0] mac_res;
