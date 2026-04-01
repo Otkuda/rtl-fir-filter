@@ -1,0 +1,12 @@
+#-----------------------------------------------------------
+# Vivado v2019.1 (64-bit)
+# SW Build 2552052 on Fri May 24 14:49:42 MDT 2019
+# IP Build 2548770 on Fri May 24 18:01:18 MDT 2019
+# Start of session at: Tue Mar 24 14:58:11 2026
+# Process ID: 22420
+# Current directory: C:/Users/Otkuda/Documents/projects/rtl-fir-filter/syn
+# Command line: vivado.exe -mode batch -source synth_module.tcl
+# Log file: C:/Users/Otkuda/Documents/projects/rtl-fir-filter/syn/vivado.log
+# Journal file: C:/Users/Otkuda/Documents/projects/rtl-fir-filter/syn\vivado.jou
+#-----------------------------------------------------------
+source synth_module.tcl
