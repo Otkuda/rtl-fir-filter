@@ -1,3 +1,4 @@
+`timescale 1ns/1ps
 module axis_fifo #(
   DEPTH = 8,
   WIDTH = 16
