@@ -13,12 +13,14 @@ module compute_mac #(
   input  logic signed [DATA_WIDTH-1:0] i_coef,
 
   output logic signed [(DATA_WIDTH+8)-1:0] o_res,
-  input  logic i_res_valid
+  input  logic i_mac_clr
 
 );
 
 localparam MULT_WIDTH  = DATA_WIDTH * 2 - 1; 
 localparam MAC_WIDTH   = (DATA_WIDTH + 8) - 1;  // extra bits for addition carry 
+
+logic mac_clr_0, mac_clr_1;
   
 logic signed [MULT_WIDTH-1:0] mul_res;
 logic signed [ MAC_WIDTH-1:0] mac_res;
@@ -39,12 +41,14 @@ always_ff @(posedge clk) begin
   else begin
     // -- Stage 1 - Multiplication --
     mul_res <= i_signal * i_coef;
+    mac_clr_0 <= i_mac_clr;
 
     // -- Stage 2 - Rounding -- 
     round_res <= pre_round[MULT_WIDTH-1:MULT_WIDTH-DATA_WIDTH];
+    mac_clr_1 <= mac_clr_0;
 
     // -- Stage 3 - Addition --
-    if (i_res_valid) begin
+    if (mac_clr_1) begin
       mac_res <= round_res;
     end
     else begin

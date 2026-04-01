@@ -46,7 +46,7 @@ class FIRFilter:
 
   def getImpulseResponse(self, n):
     imp = np.zeros(n)
-    imp[n//2] = 1
+    imp[n//2] = 10000
     return self.filterSignal(imp)
 
 
@@ -82,7 +82,7 @@ class FIRFilter:
 
           res[i-self.depth-1] += self.__roundToInt16(temp)
     
-    return res
+    return np.clip(res, -(2 ** self.precisionBits), 2 ** self.precisionBits)
 
   def __roundToInt16(self, num):
     """
