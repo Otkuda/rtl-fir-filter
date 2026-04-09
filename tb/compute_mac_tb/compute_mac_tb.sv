@@ -6,17 +6,17 @@ localparam DATA_WIDTH = 16;
 
 logic clk, rst;
 
-logic                  i_res_vld;
+logic                         i_mac_clr;
 logic signed [DATA_WIDTH-1:0] i_signal;
 logic signed [DATA_WIDTH-1:0] i_coef;
-logic signed [DATA_WIDTH-1:0] o_res;
+logic signed [33-1:0]         o_res;
 
-compute_mac DUT (
+opt_compute_mac DUT (
   .clk        (clk),
   .rst        (rst),
   .i_signal   (i_signal),
   .i_coef     (i_coef),
-  .i_res_valid(i_res_vld),
+  .i_mac_clr  (i_mac_clr),
   .o_res      (o_res)
 );
 
@@ -34,27 +34,19 @@ task reset();
 endtask
 
 initial begin
-  i_res_vld <= '0;
+  i_mac_clr <= '0;
   i_signal  <= '0;
   i_coef    <= '0;
   reset();
   repeat(3) @(posedge clk);
 
-  repeat(5) begin
-    i_res_vld <= '0;
-    i_signal <= -2;
-    i_coef   <= 16'b0100000000000000;
-    @(posedge clk);
-    i_signal <= 8;
-    i_coef   <= 16'b0010000000000000;
-    @(posedge clk);
-    i_signal <= '0;
-    i_coef   <= '0;
-    @(posedge clk);
-    @(posedge clk);
-    i_res_vld <= '1;
-    @(posedge clk);
-  end
+  i_mac_clr <= '0;
+  i_signal <= -3;
+  i_coef   <= 16'b0100000000000000;
+  @(posedge clk);
+  i_signal <= '0;
+  i_coef   <= '0;
+  repeat (20) @(posedge clk);
 
   $stop;
 end
