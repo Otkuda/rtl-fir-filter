@@ -1,6 +1,8 @@
 `timescale 1ns/1ps
 module control_fsm #(
-  DEPTH = 128
+  parameter DEPTH = 128,
+  parameter OPT_DSP_ENA = 1,
+  parameter SYNC_MEM_ENA = 1
 ) (
   input logic clk,
   input logic rst,
@@ -21,7 +23,7 @@ module control_fsm #(
   output logic o_mac_clr
 );
 
-localparam MAC_LATENCY = 3;
+localparam MAC_LATENCY = 3 + OPT_DSP_ENA;
 
 typedef enum logic [0:0] { 
   IDLE = '0,
@@ -41,6 +43,7 @@ always_ff @(posedge clk) begin
 end
 
 always_comb begin
+  next_state = state;
   case (state)
     IDLE: begin
       if (i_fifo_valid && i_res_fifo_ready)
@@ -65,7 +68,7 @@ end
 
 assign o_dl_ena    = (state == IDLE) && i_fifo_valid && i_res_fifo_ready;
 assign o_res_valid = (state == GET_RESULT) && (cnt == i_c_depth + MAC_LATENCY - 1);
-assign o_mac_clr   = (state == GET_RESULT) && (cnt == '0);
+assign o_mac_clr   = (state == GET_RESULT) && (cnt == 1'b1);
 
 assign o_dl_addr   = (state == GET_RESULT && cnt < i_c_depth) ? cnt[$clog2(DEPTH)-1:0] : '0;
 assign o_cmem_addr = (state == GET_RESULT && cnt < i_c_depth) ? cnt[$clog2(DEPTH)-1:0] : '0;
