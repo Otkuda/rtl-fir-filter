@@ -213,3 +213,5 @@ work
 # Vivado
 .Xil/
 netlists/
+syn/seq_fir_filter/seq_fir_filter.*
+!seq_fir_filter.xpr
