@@ -44,16 +44,16 @@ class FIRFilter:
     return pfr
 
 
-  def getImpulseResponse(self, n):
+  def getImpulseResponse(self, n, amp):
     imp = np.zeros(n)
-    imp[n//2] = 10000
-    return self.filterSignal(imp)
+    imp[n//2] = amp
+    return self.filterFixedSignal(imp)
 
 
-  def getStepResponse(self, n):
+  def getStepResponse(self, n, amp):
     step = np.zeros(n)
-    step[n//2:] = 1
-    return self.filterSignal(step)
+    step[n//2:] = amp
+    return self.filterFixedSignal(step)
 
 
   def filterSignal(self, signal):
@@ -80,7 +80,7 @@ class FIRFilter:
           coef = int(self.fixedCoeffs[-(j+1)])
           temp = int(signalPart[j]) * coef
 
-          res[i-self.depth-1] += self.__roundToInt16(temp)
+          res[i-self.depth+1] += self.__roundToInt16(temp)
     
     return np.clip(res, -(2 ** self.precisionBits), 2 ** self.precisionBits)
 
