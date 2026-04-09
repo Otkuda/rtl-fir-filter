@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module coef_mem #(
+module sync_coef_mem #(
   DATA_WIDTH = 16,
   DEPTH = 128
 ) (
@@ -17,17 +17,13 @@ module coef_mem #(
 (* ram_style = "block" *) logic [DATA_WIDTH-1:0] mem [0:DEPTH-1];
 
 always_ff @(posedge clk) begin
-  if (rst) begin
-    for (int i = 0; i < DEPTH; i++)
-      mem[i] <= '0;
-  end
-  else begin
     if (wren) begin
       mem[w_addr] <= w_data;
     end
-  end
+    else begin
+      r_data <= mem[r_addr];
+    end
 end
 
-assign r_data = mem[r_addr];
 
 endmodule

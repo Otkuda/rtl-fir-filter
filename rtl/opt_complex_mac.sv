@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module complex_mac #(
+module opt_complex_mac #(
   DATA_WIDTH = 16
 ) (
   input logic clk,
@@ -12,13 +12,13 @@ module complex_mac #(
   output logic signed [DATA_WIDTH*2-1:0] o_res_complex  
 );
 
-localparam MAC_WIDTH = DATA_WIDTH + 8;
+localparam MAC_WIDTH = 33;
 logic signed [MAC_WIDTH-1:0] res [0:1];
 
 genvar i;
 generate
   for (i = 0; i < 2; i++) begin
-    compute_mac # (
+    opt_compute_mac # (
       .DATA_WIDTH(DATA_WIDTH)
     ) mac_inst (
       .clk(clk),
@@ -32,7 +32,7 @@ generate
     always_comb begin
       if (res[i] > (MAC_WIDTH)'(2**(DATA_WIDTH-1)-1))
         o_res_complex[DATA_WIDTH*(2-i)-1:DATA_WIDTH*(1-i)] = (DATA_WIDTH)'(2**(DATA_WIDTH-1)-1);
-      else if (res[i] < -23'sd32768)
+      else if (res[i] < -33'sd32768)
         o_res_complex[DATA_WIDTH*(2-i)-1:DATA_WIDTH*(1-i)] = -(DATA_WIDTH)'(2**(DATA_WIDTH-1));
       else
         o_res_complex[DATA_WIDTH*(2-i)-1:DATA_WIDTH*(1-i)] = res[i][DATA_WIDTH-1:0];

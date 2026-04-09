@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 module delay_line #(
-  parameter DATA_WIDTH = 32,
-  parameter DEPTH = 128
+  DATA_WIDTH = 32,
+  DEPTH = 128
 ) (
   input logic clk,
   input logic rst,
@@ -21,21 +21,13 @@ logic [DATA_WIDTH-1:0] delay_regs [0:DEPTH-1];
 assign s_axis_tready = ena;
 
 always_ff @(posedge clk) begin
-  if (rst) begin
-    for (int i = 0; i < DEPTH; i++) begin
-      delay_regs[i] <= '0;
-    end
-  end
-  else begin
     if (ena && s_axis_tvalid) begin
       delay_regs[0] <= s_axis_tdata;
       for (int i = 1; i < DEPTH; i++) begin
         delay_regs[i] <= delay_regs[i-1];
       end
     end
-  end
+    out_data <= delay_regs[addr];
 end
-
-assign out_data = delay_regs[addr];
 
 endmodule

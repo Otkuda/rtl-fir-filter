@@ -3,6 +3,7 @@
 /*
   Pipelined MAC 
 */
+(* use_dsp = "yes" *)
 module compute_mac #(
   DATA_WIDTH = 16
 ) (

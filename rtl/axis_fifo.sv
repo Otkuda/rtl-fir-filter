@@ -6,13 +6,13 @@ module axis_fifo #(
   input logic clk,
   input logic rst,
   
-  input  logic [WIDTH-1:0] axis_tdata_s,
-  input  logic             axis_tvalid_s,
-  output logic             axis_tready_s,
+  input  logic [WIDTH-1:0] s_axis_tdata,
+  input  logic             s_axis_tvalid,
+  output logic             s_axis_tready,
 
-  output logic [WIDTH-1:0] axis_tdata_m,
-  output logic             axis_tvalid_m,
-  input  logic             axis_tready_m
+  output logic [WIDTH-1:0] m_axis_tdata,
+  output logic             m_axis_tvalid,
+  input  logic             m_axis_tready
 );
 
   localparam pointer_width = $clog2 (DEPTH),
@@ -23,11 +23,11 @@ module axis_fifo #(
 
   logic [pointer_width - 1:0] wr_ptr_d, rd_ptr_d, wr_ptr_q, rd_ptr_q;
   logic empty_d, full_d, empty_q, full_q;
-  logic [WIDTH - 1:0] data [0: DEPTH - 1];
+  (* ram_style = "block" *) logic [WIDTH - 1:0] data [0: DEPTH - 1];
   logic push, pop;
 
-  assign push = axis_tvalid_s && !full_q;
-  assign pop = axis_tready_m && !empty_q;
+  assign push = s_axis_tvalid && !full_q;
+  assign pop = m_axis_tready && !empty_q;
 
 
   always_comb begin
@@ -60,7 +60,7 @@ module axis_fifo #(
   end
 
 
-  always_ff @ (posedge clk or posedge rst)
+  always_ff @ (posedge clk)
     if (rst) begin
       wr_ptr_q <= '0;
       rd_ptr_q <= '0;
@@ -77,11 +77,11 @@ module axis_fifo #(
 
   always_ff @ (posedge clk)
     if (push)
-      data [wr_ptr_q] <= axis_tdata_s;
+      data [wr_ptr_q] <= s_axis_tdata;
 
-  assign axis_tdata_m = data [rd_ptr_q];
+  assign m_axis_tdata = data [rd_ptr_q];
 
-  assign axis_tready_s = !full_q;
-  assign axis_tvalid_m = !empty_q;
+  assign s_axis_tready = !full_q;
+  assign m_axis_tvalid = !empty_q;
 
 endmodule
