@@ -23,7 +23,7 @@ module control_fsm #(
   output logic o_mac_clr
 );
 
-localparam MAC_LATENCY = 3 + OPT_DSP_ENA;
+localparam MAC_LATENCY = 5 + OPT_DSP_ENA;
 
 typedef enum logic [0:0] { 
   IDLE = '0,
@@ -31,7 +31,8 @@ typedef enum logic [0:0] {
 } state_t;
 
 state_t state, next_state;
-logic [$clog2(DEPTH):0] cnt;
+logic [$clog2(DEPTH):0] cnt, cnt_max;
+logic cmp_res;
 
 always_ff @(posedge clk) begin
   if (rst) begin
@@ -58,19 +59,47 @@ always_comb begin
 end
 
 always_ff @(posedge clk) begin
-  if (state == GET_RESULT && cnt < i_c_depth + MAC_LATENCY - 1) begin
-    cnt <= cnt + 1'b1;
+  if (rst) begin
+    cnt_max <= '0;
+    cmp_res <= '0;
   end
   else begin
-    cnt <= '0;
+    if (state == IDLE) begin
+      cnt_max <= i_c_depth + MAC_LATENCY - 1;
+    end
+    cmp_res <= cnt != cnt_max;
   end
 end
 
-assign o_dl_ena    = (state == IDLE) && i_fifo_valid && i_res_fifo_ready;
-assign o_res_valid = (state == GET_RESULT) && (cnt == i_c_depth + MAC_LATENCY - 1);
-assign o_mac_clr   = (state == GET_RESULT) && (cnt == 1'b1);
+always_ff @(posedge clk) begin
+  if (rst) begin
+    cnt <= '0;
+  end
+  else begin
+    if (state == GET_RESULT && cmp_res) begin
+      cnt <= cnt + 1'b1;
+    end
+    else begin
+      cnt <= '0;
+    end
+  end
+end
 
-assign o_dl_addr   = (state == GET_RESULT && cnt < i_c_depth) ? cnt[$clog2(DEPTH)-1:0] : '0;
-assign o_cmem_addr = (state == GET_RESULT && cnt < i_c_depth) ? cnt[$clog2(DEPTH)-1:0] : '0;
+always_ff @(posedge clk) begin
+  if (rst) begin
+    o_dl_ena    <= '0; 
+    o_res_valid <= '0;
+    o_mac_clr   <= '0;
+    o_dl_addr   <= '0;
+    o_cmem_addr <= '0;
+  end
+  else begin
+    o_dl_ena    <= (state == IDLE) && i_fifo_valid && i_res_fifo_ready;
+    o_res_valid <= (state == GET_RESULT) && (cnt == cnt_max);
+    o_mac_clr   <= (state == GET_RESULT) && (cnt == 1'b1);
+    o_dl_addr   <=  cnt[$clog2(DEPTH)-1:0];
+    o_cmem_addr <=  cnt[$clog2(DEPTH)-1:0];
+  end
+end
 
 endmodule

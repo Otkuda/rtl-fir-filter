@@ -80,7 +80,6 @@ generate
       .DATA_WIDTH(DATA_WIDTH)
     ) coef_mem_inst (
       .clk(clk),
-      .rst(rst),
 
       .wren(wren),
       .w_addr(w_coef_addr),
