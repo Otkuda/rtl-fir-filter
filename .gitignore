@@ -215,3 +215,6 @@ work
 netlists/
 syn/seq_fir_filter/seq_fir_filter.*
 !seq_fir_filter.xpr
+
+#sim builds
+filter_tb_build/

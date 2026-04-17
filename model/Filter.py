@@ -10,10 +10,9 @@ class FIRFilter:
     Класс КИХ-фильтра. Имеет представление коэффициентов в формате с плавающей запятой и фиксированной запятой Q0.<precisionBits>
   """
   
-  def __init__(self, coefs, fs, precision):
+  def __init__(self, coefs, precision):
     self.coefs = np.array(coefs)
     self.depth = len(coefs) + 1
-    self.fs    = fs
     self.precisionBits = precision
     self.fixedCoeffs = self.__convertToFixed()
 
@@ -71,7 +70,7 @@ class FIRFilter:
           tempReal = int(signalPart[j].real) * coef
           tempImag = int(signalPart[j].imag) * coef
 
-          res[i-self.depth+1] += self.__roundToInt16(tempReal) + self.__roundToInt16(tempImag) * 1j
+          res[i-self.depth+1] += tempReal + tempImag * 1j
     else:
       res = np.zeros(len(signal)-self.depth+1)
       for i in range(self.depth-1, len(signal)):
@@ -81,16 +80,17 @@ class FIRFilter:
           temp = int(signalPart[j]) * coef
 
           res[i-self.depth+1] += self.__roundToInt16(temp)
-    
-    return np.clip(res, -(2 ** self.precisionBits), 2 ** self.precisionBits)
+
+
+    return np.clip(np.round(res / 2 ** 15), -(2 ** self.precisionBits), 2 ** self.precisionBits)
 
   def __roundToInt16(self, num):
     """
     Округляет число формата Q15.<presicionBits> в целое число по схеме RoundToEven
     """
+    num = int(num)
     if num == 0:
       return 0
-
     numBits = bin(num & 0x7fffffff)[2:]
     if len(numBits) < 15:
       return 0

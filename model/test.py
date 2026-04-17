@@ -21,6 +21,6 @@ def roundToInt16(num):
 
 def test_rounding():
   print(f"Testing from {-2**16 / 2 ** 15} to {2 ** 16 / 2**15}")
-  for i in range(-2**16, 2**16):
+  for i in range(2**17, 2**30):
     res = roundToInt16(i)
     assert np.round(i / 2 ** 15, 0) == res

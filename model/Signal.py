@@ -46,7 +46,7 @@ def generateSquareWave(freq: float, ph0: float, amp: float, fs: int, nSamples=20
 
 def quantizeSignal(signal, maxValue: int, signed=True):
   if signed:
-    res = np.clip(np.round(signal, 0), -maxValue, maxValue)
+    res = np.clip(np.round(signal, 0), -maxValue, maxValue-1)
   else:
     res = np.clip(np.round(signal, 0), 0, maxValue)
   return res
