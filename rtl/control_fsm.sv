@@ -23,7 +23,9 @@ module control_fsm #(
   output logic o_mac_clr
 );
 
-localparam MAC_LATENCY = 5 + OPT_DSP_ENA;
+localparam MAC_LATENCY = 6;
+localparam MEM_LATENCY = 4;
+localparam LATENCY = MAC_LATENCY + MEM_LATENCY;
 
 typedef enum logic [0:0] { 
   IDLE = '0,
@@ -65,7 +67,7 @@ always_ff @(posedge clk) begin
   end
   else begin
     if (state == IDLE) begin
-      cnt_max <= i_c_depth + MAC_LATENCY - 1;
+      cnt_max <= i_c_depth + LATENCY - 1;
     end
     cmp_res <= cnt != cnt_max;
   end
@@ -95,8 +97,8 @@ always_ff @(posedge clk) begin
   end
   else begin
     o_dl_ena    <= (state == IDLE) && i_fifo_valid && i_res_fifo_ready;
-    o_res_valid <= (state == GET_RESULT) && (cnt == cnt_max);
-    o_mac_clr   <= (state == GET_RESULT) && (cnt == 1'b1);
+    o_res_valid <= (state == GET_RESULT) && (!cmp_res);
+    o_mac_clr   <= (state == GET_RESULT) && (cnt == 4);
     o_dl_addr   <=  cnt[$clog2(DEPTH)-1:0];
     o_cmem_addr <=  cnt[$clog2(DEPTH)-1:0];
   end

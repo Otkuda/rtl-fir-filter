@@ -39,13 +39,43 @@ initial begin
   i_coef    <= '0;
   reset();
   repeat(3) @(posedge clk);
-
+  repeat (20) begin
+    i_mac_clr <= '1;
+    i_signal <= -3;
+    i_coef   <= 16'b0100000000000000;
+    @(posedge clk);
+    i_mac_clr <= '0;
+    i_signal <= 5;
+    i_coef   <= 16'b0110000000000000;
+    @(posedge clk);
+    i_mac_clr <= '0;
+    i_signal <= 2;
+    i_coef   <= 16'b0100000000000000;
+    @(posedge clk);
+    i_mac_clr <= '0;
+    i_signal <= -123;
+    i_coef   <= 16'b1100000000000000;
+    @(posedge clk);
+    i_mac_clr <= '0;
+    i_signal <= -3;
+    i_coef   <= 16'b0100000000000000;
+    @(posedge clk);
+    i_mac_clr <= '0;
+    i_signal <= 5;
+    i_coef   <= 16'b0110000000000000;
+    @(posedge clk);
+    i_mac_clr <= '0;
+    i_signal <= 2;
+    i_coef   <= 16'b0100000000000000;
+    @(posedge clk);
+    i_mac_clr <= '0;
+    i_signal <= -123;
+    i_coef   <= 16'b1100000000000000;
+    @(posedge clk);
+  end
   i_mac_clr <= '0;
-  i_signal <= -3;
-  i_coef   <= 16'b0100000000000000;
-  @(posedge clk);
   i_signal <= '0;
-  i_coef   <= '0;
+  i_coef   <= 16'b0000000000000000;
   repeat (20) @(posedge clk);
 
   $stop;

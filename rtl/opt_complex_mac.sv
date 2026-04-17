@@ -13,12 +13,7 @@ module opt_complex_mac #(
   output logic signed [DATA_WIDTH*2-1:0] o_res_complex  
 );
 
-localparam MAC_WIDTH = 33;
-
-localparam logic signed[DATA_WIDTH-1:0] MAX_VAL = (DATA_WIDTH)'(2**(DATA_WIDTH-1)-1);
-localparam logic signed [DATA_WIDTH-1:0] MIN_VAL = -(DATA_WIDTH)'(2**(DATA_WIDTH-1));
-
-logic signed [MAC_WIDTH-1:0] res [0:1];
+logic signed [DATA_WIDTH-1:0] res [0:1];
 
 genvar i;
 generate

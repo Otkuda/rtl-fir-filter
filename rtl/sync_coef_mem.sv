@@ -15,15 +15,17 @@ module sync_coef_mem #(
 
 (* ram_style = "block" *) logic [DATA_WIDTH-1:0] mem [0:DEPTH-1];
 
-logic [DATA_WIDTH-1:0] r_data_reg;
+logic [DATA_WIDTH-1:0] r_data_reg [0:2];
 
 always_ff @(posedge clk) begin
     if (wren) begin
       mem[w_addr] <= w_data;
     end
     else begin
-      r_data_reg <= mem[r_addr];
-      r_data     <= r_data_reg;
+      r_data_reg[0] <= mem[r_addr];
+      r_data_reg[1] <= r_data_reg[0];
+      r_data_reg[2] <= r_data_reg[1];
+      r_data        <= r_data_reg[2];
     end
 end
 
