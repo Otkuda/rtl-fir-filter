@@ -1,0 +1,8 @@
+`include "fir_regblock.rdl"
+
+addrmap fir_addrmap {
+
+  name = "FIR Filter register space";
+  fir_regfile FIR @ 0x0100;
+  
+};

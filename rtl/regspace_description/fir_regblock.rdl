@@ -1,0 +1,72 @@
+regfile fir_regfile {
+
+  reg {
+    name = "Filter depth";
+    desc = "Register containing current depth of filter";
+
+    field {
+      sw = rw;
+      hw = r ;
+      reset = 0x0;
+    } VALUE [31:0];
+
+  } filter_depth;
+
+  reg {
+    name = "Cmem_waddr";
+    desc = "Register containing write address of coefficient memory";
+
+    field {
+      sw = rw;
+      hw = r ;
+      reset = 0x0;
+    } ADDR [31:0];
+
+  } mem_addr;
+
+  reg {
+    name = "Cmem_wdata";
+    desc = "Register containing write data of coefficient memory";
+
+    field {
+      sw = rw;
+      hw = r ;
+      reset = 0x0;
+    } DATA [15:0];
+    
+  } mem_data;
+
+  reg {
+    name = "c_wr_strb";
+    desc = "Strobing register for enabling write in coefficient memory";
+
+    field {
+      sw = rw;
+      hw = r ;
+      reset = 0x0;
+      singlepulse;
+    } STRB [0:0];
+  } we_strb;
+
+  reg {
+    name = "CSR";
+    desc = "
+      Control-state register containing error codes 
+      [list]
+        [*] 0x0 - Good;
+        [*] 0x1 - Invalid coefficient memory address;
+        [*] 0x2 - Invalid filter depth value;
+        [*] ...
+      [/list]
+    ";
+
+    field {
+      sw = r;
+      hw = w;
+      reset = 0x0;
+    } CODE [15:0];
+    
+  } CSR;
+  
+};
+

@@ -218,3 +218,4 @@ syn/seq_fir_filter/seq_fir_filter.*
 
 #sim builds
 filter_tb_build/
+axil_filter_tb_build/
