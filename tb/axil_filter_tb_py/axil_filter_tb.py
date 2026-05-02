@@ -118,8 +118,10 @@ class TB():
     self.dut.s_axis_tvalid.value = 1 
     for el in signal:
       self.dut.s_axis_tdata.value = (el << 16)
-      await RisingEdge(self.dut.s_axis_tready) 
-      await RisingEdge(self.dut.clk)
+      while True:
+        await RisingEdge(self.dut.clk)
+        if self.dut.s_axis_tready.value == 1:
+          break
     self.dut.s_axis_tvalid.value = 0
 
 
@@ -130,8 +132,10 @@ class TB():
       r = LogicArray.from_signed(int(el.real), 16)
       im = LogicArray.from_signed(int(el.imag), 16)
       self.dut.s_axis_tdata.value = str(r) + str(im)
-      await RisingEdge(self.dut.s_axis_tready) 
-      await RisingEdge(self.dut.clk)
+      while True:
+        await RisingEdge(self.dut.clk)
+        if self.dut.s_axis_tready.value == 1:
+          break
     self.dut.s_axis_tvalid.value = 0
 
 
@@ -170,6 +174,7 @@ async def test_IR(dut):
   ev = Event()
   cocotb.start_soon(tb.mon_output(ev))
   await tb.pass_signal([0, 0, 0, 0, 0, 2**15-1, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+  await Timer(5000, "ns")
   tb.dut.m_axis_tready.value = 0
   ev.set()
   await Timer(100, "ns")

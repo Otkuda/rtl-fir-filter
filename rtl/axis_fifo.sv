@@ -26,6 +26,7 @@ module axis_fifo #(
   (* ram_style = "block" *) logic [WIDTH - 1:0] data [0: DEPTH - 1];
   logic push, pop;
   logic s_tvalid_reg, m_tready_reg;
+  logic [WIDTH-1:0] s_data_reg;
 
   assign push = s_tvalid_reg && !full_q;
   assign pop = m_tready_reg && !empty_q;
@@ -34,10 +35,12 @@ module axis_fifo #(
     if (rst) begin
       s_tvalid_reg <= '0;
       m_tready_reg <= '0;
+      s_data_reg   <= '0;
     end
     else begin
       s_tvalid_reg <= s_axis_tvalid;
       m_tready_reg <= m_axis_tready;
+      s_data_reg   <= s_axis_tdata;
     end
   end
 
@@ -89,7 +92,7 @@ module axis_fifo #(
 
   always_ff @ (posedge clk)
     if (push)
-      data [wr_ptr_q] <= s_axis_tdata;
+      data [wr_ptr_q] <= s_data_reg;
   
   always_ff @(posedge clk) begin
     if (rst) begin

@@ -57,33 +57,44 @@ logic                     coef_mem_wren;
 
 logic  [$clog2(DEPTH)-1:0] curr_depth; 
 
+
+axi4lite_intf #(
+    .DATA_WIDTH ( DATA_WIDTH ),
+    .ADDR_WIDTH ( ADDR_WIDTH )
+) axi4lite_if ();
+
+always_comb begin
+    axi4lite_if.AWVALID = s_axil_awvalid;
+    axi4lite_if.AWADDR  = s_axil_awaddr;
+    axi4lite_if.AWPROT  = s_axil_awprot;
+    s_axil_awready = axi4lite_if.AWREADY;
+
+    axi4lite_if.WVALID  = s_axil_wvalid;
+    axi4lite_if.WDATA   = s_axil_wdata;
+    axi4lite_if.WSTRB   = s_axil_wstrb;
+    s_axil_wready  = axi4lite_if.WREADY;
+
+    axi4lite_if.BREADY  = s_axil_bready;
+    s_axil_bvalid  = axi4lite_if.BVALID;
+    s_axil_bresp   = axi4lite_if.BRESP ;
+
+    axi4lite_if.ARVALID = s_axil_arvalid;
+    axi4lite_if.ARADDR  = s_axil_araddr;
+    axi4lite_if.ARPROT  = s_axil_arprot;
+    s_axil_arready = axi4lite_if.ARREADY;
+
+    axi4lite_if.RREADY  = s_axil_rready;
+    s_axil_rdata   =  axi4lite_if.RDATA;
+    s_axil_rresp   =  axi4lite_if.RRESP;
+    s_axil_rvalid  = axi4lite_if.RVALID;
+end
+
+
 fir_axil_slave_adapter adapter_inst (
   .i_clk(clk),
   .i_rst(rst),
 
-  .i_awvalid(s_axil_awvalid),
-  .i_awaddr (s_axil_awaddr),
-  .i_awprot (s_axil_awprot),
-  .o_awready(s_axil_awready),
-
-  .i_wvalid(s_axil_wvalid),
-  .i_wdata (s_axil_wdata),
-  .i_wstrb (s_axil_wstrb),
-  .o_wready(s_axil_wready),
-
-  .i_bready(s_axil_bready),
-  .o_bvalid(s_axil_bvalid),
-  .o_bresp (s_axil_bresp),
-
-  .i_arvalid(s_axil_arvalid),
-  .i_araddr (s_axil_araddr),
-  .i_arprot (s_axil_arprot),
-  .o_arready(s_axil_arready),
-
-  .i_rready (s_axil_rready),
-  .o_rdata  (s_axil_rdata),
-  .o_rresp  (s_axil_rresp),
-  .o_rvalid (s_axil_rvalid),
+  .s_axil(axi4lite_if),
 
   .i_csr(),
   .o_we_strb(coef_mem_wren),
